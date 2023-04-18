@@ -1,5 +1,8 @@
 #include "../sql-parser/src/SQLParser.h"
 #include "../sql-parser/src/sqlhelper.h"
+#include "heap_storage.h"
+#include "storage_engine.h"
+// #include "heap_storage.cpp"
 #include "db_cxx.h"
 #include <iostream>
 #include <cstring>
@@ -9,7 +12,9 @@ using namespace std;
 
 const std::string QUIT = "quit";
 const unsigned int BLOCK_SZ = 4096;
+const string TEST = "test";
 const char *MILESTONE1 = "milestone1.db";
+DbEnv *_DB_ENV;
 
 std::string execute(hsql::SQLParserResult* query, std::string response);
 std::string parseCreate(std::string response);
@@ -18,6 +23,7 @@ string parseSelect(hsql::SelectStatement* selectStatement);
 string parseExpressionWithOperator(hsql::Expr* expr);
 string parseExpressionWithoutOperator(hsql::Expr* expr);
 string parseExpression(hsql::Expr* expr);
+void test_heap_storage2();
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -42,12 +48,21 @@ int main(int argc, char *argv[]) {
 	db.set_message_stream(env.get_message_stream());
 	db.set_error_stream(env.get_error_stream());
 	db.set_re_len(BLOCK_SZ);
-	db.open(NULL, MILESTONE1, NULL, DB_RECNO, DB_CREATE | DB_TRUNCATE, 0644);
+	int id = db.open(NULL, MILESTONE1, NULL, DB_RECNO, DB_CREATE | DB_TRUNCATE, 0644);
+    if(id == 0) cout << "In main, opened successfully" << endl;
+
+    _DB_ENV = &env;
 
     std::string response;
+
     while (response != QUIT) {
         std::cout << "SQL> ";
         getline(std::cin, response);
+
+        if (response == TEST) {
+            if (test_heap_storage())
+                std::cout << "Passed heap storage tests";
+        }
 
         char* responseArray = new char[response.length() + 1];
         strcpy(responseArray, response.c_str());
