@@ -741,7 +741,7 @@ bool test_heap_storage() {
     value = (*result)["b"];
     if (value.s != "Hello!")
 		return false;
-    table.drop();
+    table.drop(); 
 
     return true;
 }
