@@ -397,11 +397,7 @@ void HeapTable::close() {
  * @return a Handle to where the row was inserted
  */
 Handle HeapTable::insert(const ValueDict *row) {
-    open();
-    ValueDict *new_row = validate(row);
-    Handle handle = append(new_row);
-    delete new_row;
-    return handle;
+    throw DbRelationError("Insert not implemented");
 }
 
 // not yet implemented
@@ -444,7 +440,7 @@ Handles *HeapTable::select(const ValueDict *where) {
  * @return a ValueDict of the row's data
  */
 ValueDict *HeapTable::project(Handle handle) {
-   return project(handle, &column_names);
+    throw DbRelationError("Project not implemented");
 }
 
 /**
@@ -454,24 +450,7 @@ ValueDict *HeapTable::project(Handle handle) {
  * @return a ValueDict of the row's data
  */
 ValueDict *HeapTable::project(Handle handle, const ColumnNames *column_names) {
-    SlottedPage* block = file.get(handle.first); // get the right block
-    Dbt* record = block->get(handle.second); // get the record
-    ValueDict* unmarshaledData = unmarshal(record);
-    ValueDict* result; // to hold the values of all the column names selected
-
-    // go through all the column names being selected and get the values for those
-    for(Identifier columnName : *column_names){
-        // map.find(key) returns an iterator pointing to the element w/ that key, and an iterator
-        // pointing to map.end() if the key doesn't exist in the map
-        std::map<Identifier, Value>::iterator it = unmarshaledData->find(columnName);
-        if(it != unmarshaledData->end())
-            result->insert({it->first, it->second}); // add the identifier and its value to the result 
-    }
-
-    delete block;
-    delete record;
-    delete unmarshaledData;
-    return result;
+    throw DbRelationError("Project not implemented");
 }
 
 /**
@@ -588,9 +567,6 @@ ValueDict *HeapTable::unmarshal(Dbt *data) {
 
     return dict;
 }
-
-// bool test_heap_storage(){};
-    // test function -- returns true if all tests pass
 
 bool test_slotted_page() {
     // construct one
@@ -722,8 +698,6 @@ bool test_heap_storage() {
     HeapTable table1("test_create_drop_cpp", column_names, column_attributes);
     table1.create();
     std::cout << "create ok" << std::endl;
-    // table1.drop();  // drop makes the object unusable because of BerkeleyDB restriction -- maybe want to fix this some day
-    //std::cout << "drop ok" << std::endl;
 
     HeapTable table("test_data_cpp", column_names, column_attributes);
     table.create_if_not_exists();
@@ -732,21 +706,7 @@ bool test_heap_storage() {
     ValueDict row;
     row["a"] = Value(12);
     row["b"] = Value("Hello!");
-    // std::cout << "try insert" << std::endl;
-    table.insert(&row);
-    // std::cout << "insert ok" << std::endl;
     Handles* handles = table.select();
     std::cout << "select ok " << handles->size() << std::endl;
-
-    // ValueDict *result = table.project((*handles)[0]);
-    // std::cout << "project ok" << std::endl;
-    // Value value = (*result)["a"];
-    // if (value.n != 12)
-    // 	return false;
-    // value = (*result)["b"];
-    // if (value.s != "Hello!")
-	// 	return false;
-    // table.drop();
-
     return true;
 }
