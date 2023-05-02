@@ -1,7 +1,6 @@
 /**
  * @file SQLExec.cpp - implementation of SQLExec class
- * @author Kevin Lundeen
- * @see "Seattle University, CPSC5300, Winter 2023"
+ * @author Bryan Duong, Ninn Sieng
  */
 #include "SQLExec.h"
 
@@ -43,12 +42,31 @@ ostream &operator<<(ostream &out, const QueryResult &qres) {
 }
 
 QueryResult::~QueryResult() {
-    // FIXME
+    if(this->column_names) {
+        delete this->column_names;
+    }
+    if(this->column_attributes) {
+        delete this->column_attributes;
+    }
+    if(this->rows) {
+        delete this->rows;
+    }
 }
 
 
 QueryResult *SQLExec::execute(const SQLStatement *statement) {
-    // FIXME: initialize _tables table, if not yet present
+    // checking if tables have been initialized
+    // and creating tables if not
+    if(SQLExec::tables == nullptr)
+    {
+        SQLExec::tables = new Tables();
+    }
+    // checking if indices have been initiated
+    // and creating indices if not
+    if(SQLExec::indices == nullptr)
+    {
+        SQLExec::indices = new Indices();
+    }
 
     try {
         switch (statement->type()) {
@@ -66,18 +84,44 @@ QueryResult *SQLExec::execute(const SQLStatement *statement) {
     }
 }
 
-void
-SQLExec::column_definition(const ColumnDefinition *col, Identifier &column_name, ColumnAttribute &column_attribute) {
-    throw SQLExecError("not implemented");  // FIXME
+void SQLExec::column_definition(const ColumnDefinition *col, Identifier &column_name, ColumnAttribute &column_attribute) {
+   column_name = col->name;
+   switch(col->type)
+   {
+        case ColumnDefinition::DataType::INT:
+            column_attribute = ColumnDefinition::DataType::INT;
+            break;
+        case ColumnDefinition::DataType::TEXT:
+            column_attribute = ColumnAttribute::DataType::TEXT;
+            break;
+        default:
+            throw SQLExecError("not implemented");
+   }    
 }
 
 QueryResult *SQLExec::create(const CreateStatement *statement) {
-    return new QueryResult("not implemented"); // FIXME
+    switch(statement->type)
+    {
+        case CreateStatement::kIndex:
+            return create_index(statement);
+        case CreateStatement::kTable:
+            return create_table(statement);
+        default:
+            return new QueryResult("not implemented");
+    }
 }
 
 // DROP ...
 QueryResult *SQLExec::drop(const DropStatement *statement) {
-    return new QueryResult("not implemented"); // FIXME
+    switch(statement->type)
+    {
+        case DropStatement::kIndex:
+            return drop_index(statement);
+        case DropStatement::kTable:
+            return drop_table(statement);
+        default:
+            return new QueryResult("not implemented");
+    }
 }
 
 QueryResult *SQLExec::show(const ShowStatement *statement) {
