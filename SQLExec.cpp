@@ -191,11 +191,57 @@ QueryResult *SQLExec::show_columns(const ShowStatement *statement) {
 }
 
 static QueryResult *SQLExec::create_index(const hsql::CreateStatement *statement){
-    return new QueryResult("not implemented");
+    DbRelation& table = SQLExec::tables->get_table(statement->tableName);
+    bool isBTree = false;
+    
+    const ColumnNames& name = table.get_column_names();
+    for(auto *col : *statement->indexColumns) {
+        if(find(name.begin(), name.end(), string(col)) == name.end())
+        {
+            throw SQLExecError("Column " + string(col) + " not found in " + string(statement->tableName));
+        }
+    }
+    if(string(statement->indexType) == "BTREE")
+    {
+        isBTree = true;
+    }
+    
+    // Obtaining data from SQL statement to add to indices
+    ValueDict row;
+    row["table_name"] = Value(statement->tableName);
+    row["index_name"] = Value(statement->indexName);
+    row["index_type"] = Value(statement->indexType);
+    row["is_unique"] = Value(isBTree);
+    
+    // Row insertion for each index column
+    for(auto* column : *statement->indexColumns) {
+        row["column_name"] = Value(column);
+        row["seq_in_index"].n += 1;
+        SQLExec::indices->insert(&row);
+    }
+    
+    DbIndex& index = SQLExec::indices->get_index(statement->tableName, statement->indexName);
+    index.create();
+    return new QueryResult("Index Created: " + string(statement->indexName));
 }
     
 static QueryResult *SQLExec::drop_index(const hsql::DropStatement *statement){
-    return new QueryResult("not implemented");
+    // Obtaining the index to drop
+    DbIndex& index = SQLExec::indices->get_index(statement->name, statement->indexName);
+    index.drop();
+    
+    ValueDict where;
+    row["table_name"] = Value(statement->name);
+    row["index_name"] = Value(statement->indexName);
+    
+    // Removal of the rows in indices table
+    Handles* indexRows = SQLExec::indices->select(&where);
+    for(auto &row : *indexRows)
+    {
+        SQLExec::indices->del(row);
+    }
+    delete indexRows;
+    return new QueryResult("Index dropped: " + string(statement->indexName));
 }
 
 QueryResult *SQLExec::show_index(const hsql::ShowStatement *statement){
