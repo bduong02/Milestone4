@@ -80,7 +80,7 @@ protected:
     
     static QueryResult *drop_table(const hsql::DropStatement *statement);
 
-    static QueryResult *show_tables(const hsql::ShowStatement *statement);
+    static QueryResult *show_tables();
 
     static QueryResult *show_columns(const hsql::ShowStatement *statement);
     
