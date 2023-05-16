@@ -245,5 +245,42 @@ static QueryResult *SQLExec::drop_index(const hsql::DropStatement *statement){
 }
 
 QueryResult *SQLExec::show_index(const hsql::ShowStatement *statement){
-    return new QueryResult("not implemented");
+    //Create columns to store index table data
+    ColumnNames *col_names = new ColumnNames;
+    ColumnAttributes *col_attrib = new ColumnAttributes;
+    
+    col_names->push_back("table_name");
+    col_attrib->push_back(ColumnAttribute(ColumnAttribute::TEXT));
+    
+    col_names->push_back("index_name");
+    col_attrib->push_back(ColumnAttribute(ColumnAttribute::TEXT));
+    
+    col_names->push_back("column_name");
+    col_attrib->push_back(ColumnAttribute(ColumnAttribute::TEXT));
+    
+    col_names->push_back("seq_in_index");
+    col_attrib->push_back(ColumnAttribute(ColumnAttribute::INT));
+    
+    col_names->push_back("index_type");
+    col_attrib->push_back(ColumnAttribute(ColumnAttribute::TEXT));
+    
+    col_names->push_back("is_unique");
+    col_attrib->push_back(ColumnAttribute(ColumnAttribute::BOOLEAN));
+    
+    //Select from the indices table where table_name = tableName in statement
+    ValueDict where;
+    where["table_name"] = Value(string(statement->tableName));
+    Handles *indexRows = SQLExec::indices->select(&where);
+    //number of rows returned
+    u_long n = indexRows->size();
+    
+    //For each record in indices table, extract row data(row_dict) by table_name, column_name and data_type
+    ValueDicts *rows = new ValueDicts;
+    for (auto const &indexRow: *indexRows) 
+    {
+        ValueDict *row_dict = SQLExec::indices->project(indexRow, column_names);
+        rows->push_back(row_dict);
+    }
+    delete indexRows;
+    return new QueryResult(column_names, column_attributes, rows, "successfully returned " + to_string(n) + " rows");
 }
