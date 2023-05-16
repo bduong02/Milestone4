@@ -79,6 +79,8 @@ protected:
     static QueryResult *show_tables();
 
     static QueryResult *show_columns(const hsql::ShowStatement *statement);
+    
+    static QueryResult *create_index(const hsql::CreateStatement *statement);
 
     static QueryResult *drop_index(const hsql::DropStatement *statement);
 
