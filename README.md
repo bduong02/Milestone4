@@ -4,11 +4,11 @@
 DB Relation Manager project for CPSC4300 at Seattle U, Spring 2023, Project Cheetah.
 
 ## Features
-### Milestone 1
-A SQL parser for ` CREATE TABLE ` and ` SELECT ` SQL statements. Takes statements from the user, validates them, cleans them, and displays them. Uses the [Hyrise SQL parser](https://github.com/klundeen/sql-parser) to convert the user's input.
+### Milestone 3
+Implements Create, Show, and Drop SQL statements for tables. Show statements also display columns.
 
-### Milestone 2
-A heap storage engine using [Berkeley DB](https://www.oracle.com/database/technologies/related/berkeleydb.html). Implements a slotted page structure for blocks (` DbBlock `), heap files (` DbFile `), and heap tables (` DbRelation `). ` HeapTable ` supports ` create `, ` create if not exists `, ` open `, ` close `, ` drop `, ` insert`, and simple ` select ` (no clauses). It also only supports column attributes INT and TEXT.
+### Milestone 4
+Additional functionality for Create, Show, and Drop SQL statements for indexes.
 
 ## Installation
 1. Clone the repository on CS1
@@ -36,22 +36,91 @@ export PYTHONPATH=/usr/local/db6/lib/site-packages:$PYTHONPATH
 5. User input options
 
     * SQL ` CREATE TABLE ` and ` SELECT ` statements (see example)
-    * ` test ` runs the Milestone 2 tests
+    * ` test ` runs the Milestone 4 tests
     * ` quit ` exits the program
 
 ## Example
 
 ```
-$ ./m cpsc4300/data
-SQL> create table foo (a text, b integer, c double)
-CREATE TABLE foo (a TEXT, b INT, c DOUBLE)
-SQL> select * from foo left join goober on foo.x=goober.x
-SELECT * FROM foo LEFT JOIN goober ON foo.x = goober.x
-SQL> select f.a,g.b,h.c from foo as f join goober as g on f.id = g.id where f.z >1
-SELECT f.a, g.b, h.c FROM foo AS f JOIN goober AS g ON f.id = g.id WHERE f.z > 1
-SQL> not real sql
-Invalid SQL: not real sql
-SQL> quit
+SQL> show tables
+SHOW TABLES
+table_name 
++----------+
+"goober" 
+successfully returned 1 rows
+SQL> show columns from goober
+SHOW COLUMNS FROM goober
+table_name column_name data_type 
++----------+----------+----------+
+"goober" "x" "INT" 
+"goober" "y" "INT" 
+"goober" "z" "INT" 
+successfully returned 3 rows
+SQL> create index fx on goober (x,y)
+CREATE INDEX fx ON goober USING BTREE (x, y)
+created index fx
+SQL> show index from goober
+SHOW INDEX FROM goober
+table_name index_name column_name seq_in_index index_type is_unique 
++----------+----------+----------+----------+----------+----------+
+"goober" "fx" "x" 1 "BTREE" true 
+"goober" "fx" "y" 2 "BTREE" true 
+successfully returned 2 rows
+SQL> drop index fx from goober
+DROP INDEX fx FROM goober
+dropped index fx
+SQL> show index from goober
+SHOW INDEX FROM goober
+table_name index_name column_name seq_in_index index_type is_unique 
++----------+----------+----------+----------+----------+----------+
+successfully returned 0 rows
+SQL> create index fx on goober (x)
+CREATE INDEX fx ON goober USING BTREE (x)
+created index fx
+SQL> show index from goober
+SHOW INDEX FROM goober
+table_name index_name column_name seq_in_index index_type is_unique 
++----------+----------+----------+----------+----------+----------+
+"goober" "fx" "x" 1 "BTREE" true 
+successfully returned 1 rows
+SQL> create index fx on goober (y,z)
+CREATE INDEX fx ON goober USING BTREE (y, z)
+Error: DbRelationError: duplicate index goober fx
+SQL> show index from goober
+SHOW INDEX FROM goober
+table_name index_name column_name seq_in_index index_type is_unique 
++----------+----------+----------+----------+----------+----------+
+"goober" "fx" "x" 1 "BTREE" true 
+successfully returned 1 rows
+SQL> create index fyz on goober (y,z)
+CREATE INDEX fyz ON goober USING BTREE (y, z)
+created index fyz
+SQL> show index from goober
+SHOW INDEX FROM goober
+table_name index_name column_name seq_in_index index_type is_unique 
++----------+----------+----------+----------+----------+----------+
+"goober" "fx" "x" 1 "BTREE" true 
+"goober" "fyz" "y" 1 "BTREE" true 
+"goober" "fyz" "z" 2 "BTREE" true 
+successfully returned 3 rows
+SQL> drop index fx from goober
+DROP INDEX fx FROM goober
+dropped index fx
+SQL> show index from goober
+SHOW INDEX FROM goober
+table_name index_name column_name seq_in_index index_type is_unique 
++----------+----------+----------+----------+----------+----------+
+"goober" "fyz" "y" 1 "BTREE" true 
+"goober" "fyz" "z" 2 "BTREE" true 
+successfully returned 2 rows
+SQL> drop index fyz from goober
+DROP INDEX fyz FROM goober
+dropped index fyz
+SQL> show index from goober
+SHOW INDEX FROM goober
+table_name index_name column_name seq_in_index index_type is_unique 
++----------+----------+----------+----------+----------+----------+
+successfully returned 0 rows
 ```
 
 ## Acknowledgements
