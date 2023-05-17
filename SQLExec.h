@@ -8,7 +8,7 @@
 #include <exception>
 #include <string>
 #include "SQLParser.h"
-#include "schema_tables.h"
+#include "SchemaTables.h"
 
 /**
  * @class SQLExecError - exception for SQLExec methods
@@ -75,16 +75,10 @@ protected:
     static QueryResult *drop(const hsql::DropStatement *statement);
 
     static QueryResult *show(const hsql::ShowStatement *statement);
-    
-    static QueryResult *create_table(const hsql::CreateStatement *statement);
-    
-    static QueryResult *drop_table(const hsql::DropStatement *statement);
 
     static QueryResult *show_tables();
 
     static QueryResult *show_columns(const hsql::ShowStatement *statement);
-    
-    static QueryResult *create_index(const hsql::CreateStatement *statement);
 
     static QueryResult *drop_index(const hsql::DropStatement *statement);
 
@@ -99,3 +93,4 @@ protected:
     static void
     column_definition(const hsql::ColumnDefinition *col, Identifier &column_name, ColumnAttribute &column_attribute);
 };
+

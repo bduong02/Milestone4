@@ -70,7 +70,7 @@ public:
      * @param record_id  which record to fetch
      * @returns          the data stored for the given record
      */
-    virtual Dbt *get(RecordID record_id) const = 0;
+    virtual Dbt *get(RecordID record_id) {return nullptr;};
 
     /**
      * Change the data stored for a record in this block.
@@ -91,7 +91,7 @@ public:
      * Get all the record ids in this block (excluding deleted ones).
      * @returns  pointer to list of record ids (freed by caller)
      */
-    virtual RecordIDs *ids() const = 0;
+    virtual RecordIDs *ids()  {return nullptr;};
 
     /**
      * Access the whole block's memory as a BerkeleyDB Dbt pointer.
@@ -181,12 +181,11 @@ public:
      * FIXME - not a good long-term approach, but we'll do this until we put in iterators
      * @returns  a pointer to vector of BlockIDs (freed by caller)
      */
-    virtual BlockIDs *block_ids() const = 0;
+    virtual BlockIDs *block_ids() {return nullptr;};
 
 protected:
     std::string name;  // filename (or part of it)
 };
-
 
 /**
  * @class ColumnAttribute - holds datatype and other info for a column
@@ -225,11 +224,11 @@ public:
 
     Value(int32_t n) : n(n) { data_type = ColumnAttribute::INT; }
 
-    Value(std::string s) : s(s) { data_type = ColumnAttribute::TEXT; }
+    Value(std::string s) : n(0), s(s) { data_type = ColumnAttribute::TEXT; }
 
     bool operator==(const Value &other) const;
-
     bool operator!=(const Value &other) const;
+    bool operator<(const Value &other) const;
 };
 
 // More type aliases
@@ -359,38 +358,22 @@ public:
      * @returns             dictionary of values from row (keyed by column_names)
      */
     virtual ValueDict *project(Handle handle, const ColumnNames *column_names) = 0;
-
-    /**
-     * Return a sequence of values for handle given by column_names (from dictionary)
-     * (SELECT <column_names>).
-     * @param handle        row to get values from
-     * @param column_names  list of column names to project (taken from keys of dict)
-     * @return              dictionary of values from row (keyed by column_names)
-     */
-    virtual ValueDict *project(Handle handle, const ValueDict *column_names);
-
-    /**
-     * Accessor for column_names.
-     * @returns column_names   list of column names for this relation, in order
-     */
+    
     virtual const ColumnNames &get_column_names() const {
         return column_names;
     }
 
-    /**
-     * Accessor for column_attributes.
-     * @returns column_attributes dictionary of column attributes keyed by column names
-     */
-    virtual const ColumnAttributes get_column_attributes() const {
-        return column_attributes;
-    }
+    ColumnAttributes get_column_attributes(const ColumnNames &select_column_names) const;
+    ValueDict* project(Handle handle, const ValueDict *where);
+    ValueDicts project(Handles *handles);
+    ValueDicts project(Handles *handles, const ColumnNames *column_names);
+    ValueDicts* project(Handles *handles, const ValueDict * &where);
 
 protected:
     Identifier table_name;
     ColumnNames column_names;
     ColumnAttributes column_attributes;
 };
-
 
 class DbIndex {
 public:
@@ -464,4 +447,5 @@ protected:
     ColumnNames key_columns;
     bool unique;
 };
+
 

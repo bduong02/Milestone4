@@ -1,19 +1,18 @@
-# 4300-Cheetah
-
+# 4300-Echidna
 ## Description
-DB Relation Manager project for CPSC4300 at Seattle U, Spring 2023, Project Cheetah.
+DB Relation Manager project for CPSC4300 at Seattle U, Spring 2023, Project Echidna
 
-## Features
-### Milestone 1
-A SQL parser for ` CREATE TABLE ` and ` SELECT ` SQL statements. Takes statements from the user, validates them, cleans them, and displays them. Uses the [Hyrise SQL parser](https://github.com/klundeen/sql-parser) to convert the user's input.
+## New Features
+### Milestone 3
+Executes `CREATE`, `DROP`, and `SHOW` SQL statements in a Berkeley DB Database. `SHOW` statements can handle displaying tables and columns.
 
-### Milestone 2
-A heap storage engine using [Berkeley DB](https://www.oracle.com/database/technologies/related/berkeleydb.html). Implements a slotted page structure for blocks (` DbBlock `), heap files (` DbFile `), and heap tables (` DbRelation `). ` HeapTable ` supports ` create `, ` create if not exists `, ` open `, ` close `, ` drop `, ` insert`, and simple ` select ` (no clauses). It also only supports column attributes INT and TEXT.
+### Milestone 4
+Builds off of Milestone 3 to `CREATE`, `DROP`, and `SHOW` indices as well as tables.
 
 ## Installation
 1. Clone the repository on CS1
 
-` git clone https://github.com/BguardiaOpen/4300-Cheetah23SQ.git `
+` git clone https://github.com/BguardiaOpen/4300-Echidna23SQ.git `
 
 2. Ensure the ` .bash_profile ` path is configured correctly
 
@@ -26,29 +25,48 @@ export PYTHONPATH=/usr/local/db6/lib/site-packages:$PYTHONPATH
 ## Usage
 1. Create a directory to hold the database (first time usage only)
 2. Compile the program with ` make `
-3. Run the program with ` ./m path_to_database_directory `
+3. Run the program with ` ./cpsc4300 path_to_database_directory `
     
     * The path must be the path to the directory from the root user@cs1
 4. Other ``` make ``` options
     
     * ` make clean `: removes the object code files
-    * ` make valgrind `: shows locations of memory leaks (might be necessary to change database directory in ` Makefile `)
 5. User input options
 
-    * SQL ` CREATE TABLE ` and ` SELECT ` statements (see example)
-    * ` test ` runs the Milestone 2 tests
+    * SQL `CREATE`, `DROP`, and `SHOW` statements (see example)
     * ` quit ` exits the program
 
 ## Example
 
 ```
-$ ./m cpsc4300/data
-SQL> create table foo (a text, b integer, c double)
-CREATE TABLE foo (a TEXT, b INT, c DOUBLE)
-SQL> select * from foo left join goober on foo.x=goober.x
-SELECT * FROM foo LEFT JOIN goober ON foo.x = goober.x
-SQL> select f.a,g.b,h.c from foo as f join goober as g on f.id = g.id where f.z >1
-SELECT f.a, g.b, h.c FROM foo AS f JOIN goober AS g ON f.id = g.id WHERE f.z > 1
+$ ./cpsc4300 cpsc4300/data
+SQL> create table foo (a text, b integer)
+CREATE TABLE foo (a TEXT, b INT)
+SQL> show tables
+SHOW TABLES
+table_name 
++----------+
+"foo" 
+SQL> show columns from foo
+SHOW COLUMNS FROM foo
+table_name column_name data_type 
++----------+----------+----------+
+"foo" "a" "TEXT" 
+"foo" "b" "INT"
+SQL> drop table foo
+DROP TABLE foo
+SQL> show tables
+SHOW TABLES
+table_name 
++----------+
+SQL> create index fx on foo (a)
+CREATE INDEX fx ON foo USING BTREE (a)
+created index fx
+SQL> show index from foo
+SHOW INDEX FROM goober
+table_name index_name column_name seq_in_index index_type is_unique 
++----------+----------+----------+----------+----------+----------+
+"foo" "fx" "a" 1 "BTREE" true
 SQL> not real sql
 Invalid SQL: not real sql
 SQL> quit

@@ -3,7 +3,7 @@
  * @author Kevin Lundeen
  * @see "Seattle University, CPSC5300, Winter 2023"
  */
-#include "schema_tables.h"
+#include "SchemaTables.h"
 #include "ParseTreeToString.h"
 
 
@@ -17,7 +17,6 @@ void initialize_schema_tables() {
     Indices indices;
     indices.create_if_not_exists();
     indices.close();
-
 }
 
 // Not terribly useful since the parser weeds most of these out
@@ -329,6 +328,7 @@ void Indices::del(Handle handle) {
     ValueDict *row = project(handle);
     Identifier table_name = row->at("table_name").s;
     Identifier index_name = row->at("index_name").s;
+    delete row;
     std::pair<Identifier, Identifier> cache_key(table_name, index_name);
     if (Indices::index_cache.find(cache_key) != Indices::index_cache.end()) {
         DbIndex *index = Indices::index_cache.at(cache_key);
@@ -339,8 +339,7 @@ void Indices::del(Handle handle) {
 }
 
 // Return a list of column names and column attributes for given table.
-void Indices::get_columns(Identifier table_name, Identifier index_name, ColumnNames &column_names, bool &is_hash,
-                          bool &is_unique) {
+void Indices::get_columns(Identifier table_name, Identifier index_name, ColumnNames &column_names, bool &is_hash, bool &is_unique) {
     // SELECT * FROM _indices WHERE table_name = <table_name> AND index_name = <index_name>
     ValueDict where;
     where["table_name"] = table_name;
