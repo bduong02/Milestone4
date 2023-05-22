@@ -14,21 +14,13 @@ cpsc4300: $(OBJS)
 
 
 storage_engine.o : storage_engine.h 
-
 SlottedPage.o: SlottedPage.h 
-
 HeapFile.o: HeapFile.h
-
 HeapTable.o: HeapTable.h 
-
 heap_storage.o: heap_storage.h
-
 ParseTreeToString.o : ParseTreeToString.h
-
 SchemaTables.o : SchemaTables.h
-
 SQLExec.o : SQLExec.h
-
 cpsc4300.o: cpsc4300.cpp
 
 
