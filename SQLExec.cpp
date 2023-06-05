@@ -7,6 +7,13 @@
 #include "ParseTreeToString.h"
 #include "SchemaTables.h"
 #include <iostream>
+#include <stdio.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/file.h>
+#include <fcntl.h>
+
 
 using namespace std;
 using namespace hsql;
@@ -69,6 +76,9 @@ QueryResult::~QueryResult() {
  * @return QueryResult* the result of the statement
  */
 QueryResult *SQLExec::execute(const SQLStatement *statement) {
+    //wait for file lock before doing anything
+    awaitDBLock();
+
     // Initializes _tables table if not null
     if (SQLExec::tables == nullptr) {
         SQLExec::tables = new Tables();
@@ -83,12 +93,26 @@ QueryResult *SQLExec::execute(const SQLStatement *statement) {
                 return drop((const DropStatement *) statement);
             case kStmtShow:
                 return show((const ShowStatement *) statement);
+            case ktStmtInsert:
+                return nullptr;
+            
+            case kStmtTransaction:
+                //handle different transaction statements
+                
+                switch(statement->command) {
+
+                }
+            
             default:
                 return new QueryResult("not implemented");
         }
     } catch (DbRelationError &e) {
         throw SQLExecError(string("DbRelationError: ") + e.what());
     }
+
+    //release the dblock to ensure another 
+    //blocked process can read/write to the db
+    releaseDBLock();
 }
 
 /**
@@ -429,4 +453,29 @@ QueryResult *SQLExec::show_index(const ShowStatement *statement) {
     }
     delete handleList;
     return new QueryResult(colNames, colAttr, rows, "showing indices");
+}
+
+void SQLExec::awaitDBLock() {
+    //try to create lock file if it doesn't exist, acquiring permission with unmask if needed
+    mode_t m = umask( 0 );
+    lockFile_FD = open(LOCKFILE.c_str(), O_RDWR|O_CREAT, 0666);
+    unmask(m);
+    int fileLockAcquired = 0;
+
+
+    if(lockFile_FD == -1)
+        throw new DbRelationError("unable to create or open lock file");
+
+    //will block the process until the exclusive file lock is received
+    fileLockAcquired = flock(fd, LOCK_EX);
+}
+
+void SQLExec::releaseDBLock() {
+    if(lockFile_FD < 0)
+        return;
+
+    //release the lock and close the file
+    flock(fd, LOCK_UN);
+    close(lockFile_FD);
+    lockFile_FD = -1;
 }
