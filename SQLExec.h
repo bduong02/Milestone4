@@ -15,7 +15,7 @@
 /**
  * @class SQLExecError - exception for SQLExec methods
  */
-class SQLExecError : public std::runtime_error {
+/*class SQLExecError : public std::runtime_error {
 public:
     explicit SQLExecError(std::string s) : runtime_error(s) {}
 };
@@ -24,7 +24,7 @@ public:
 struct SQLRollbackLevel {
     hsql::SQLStatement* rollbackStmt = nullptr;
     stack<SQLRollbackLevel>* nestedTransaction = nullptr;
-}
+}*/
 
 
 
@@ -108,15 +108,15 @@ protected:
 
     static QueryResult *del(const hsql::DeleteStatement *statement);
 
-    static QueryResult* begin_transaction(const hsql::TransactionStatement *statement);
+//    static QueryResult* begin_transaction(const hsql::TransactionStatement *statement);
 
-    static QueryResult* commit_transaction();
+ //   static QueryResult* commit_transaction();
 
-    static QueryResult* abort_transaction();
+   // static QueryResult* abort_transaction();
 
-    static void awaitDBLock();
+ //   static void awaitDBLock();
 
-    static void releaseDBLock();
+  //  static void releaseDBLock();
     /**
      * Pull out column name and attributes from AST's column definition clause
      * @param col                AST column definition
