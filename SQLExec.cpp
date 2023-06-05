@@ -454,7 +454,7 @@ QueryResult *SQLExec::show_index(const ShowStatement *statement) {
     delete handleList;
     return new QueryResult(colNames, colAttr, rows, "showing indices");
 }
-
+/*
 void SQLExec::awaitDBLock() {
     //try to create lock file if it doesn't exist, acquiring permission with unmask if needed
     mode_t m = umask( 0 );
@@ -478,4 +478,4 @@ void SQLExec::releaseDBLock() {
     flock(fd, LOCK_UN);
     close(lockFile_FD);
     lockFile_FD = -1;
-}
+}*/
