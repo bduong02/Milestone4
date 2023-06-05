@@ -311,7 +311,7 @@ class DbRelation {
          * @param row  a dictionary keyed by column names
          * @returns    a handle to the new row
          */
-        virtual Handle insert(const ValueDict *row) {return nullptr;};
+        virtual Handle insert(const ValueDict *row) {return std::nullptr_t;};
 
         /**
          * Conceptually, execute: UPDATE INTO <table_name> SET <new_values> WHERE <handle>
