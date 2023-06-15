@@ -15,13 +15,13 @@
 /**
  * @class SQLExecError - exception for SQLExec methods
  */
-/*class SQLExecError : public std::runtime_error {
+class SQLExecError : public std::runtime_error {
 public:
     explicit SQLExecError(std::string s) : runtime_error(s) {}
 };
 
 //A class that defines a new rollback level or statement to rollback
-struct SQLRollbackLevel {
+/*struct SQLRollbackLevel {
     hsql::SQLStatement* rollbackStmt = nullptr;
     stack<SQLRollbackLevel>* nestedTransaction = nullptr;
 }*/
