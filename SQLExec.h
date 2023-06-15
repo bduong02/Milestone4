@@ -77,16 +77,16 @@ protected:
     // the one place in the system that holds the _tables and _indices tables
     static Tables *tables;
     static Indices *indices;
-    static int transactionLevel = 0;
-    static int lockFile_FD = -1;
+   // static int transactionLevel = 0;
+  //  static int lockFile_FD = -1;
 
     //create a hidden dblock file (ideally you, the user should not directly access
     //this outside the program) (for the love of god at least don't while the milestone processes are running : ) )
-    static const string LOCKFILE =  "./.sql4300dblock.lock";
+  //  static const string LOCKFILE =  "./.sql4300dblock.lock";
 
     //add sql statements that counter added sql actions in case of rollback
-    static stack<SQLRollbackLevel> rollbackStack();
-    static stack<SQLRollbackLevel>* currRollbackLevel = &rollbackStack;
+ //   static stack<SQLRollbackLevel> rollbackStack();
+  //  static stack<SQLRollbackLevel>* currRollbackLevel = &rollbackStack;
     
 
     // recursive decent into the AST
