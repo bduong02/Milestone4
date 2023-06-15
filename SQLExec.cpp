@@ -77,7 +77,10 @@ QueryResult::~QueryResult() {
  */
 QueryResult *SQLExec::execute(const SQLStatement *statement) {
     //wait for file lock before doing anything
-    awaitDBLock();
+   // awaitDBLock();
+    QueryResult* result;
+    bool throwError = false;
+    exception error;
 
     // Initializes _tables table if not null
     if (SQLExec::tables == nullptr) {
@@ -88,31 +91,40 @@ QueryResult *SQLExec::execute(const SQLStatement *statement) {
     try {
         switch (statement->type()) {
             case kStmtCreate:
-                return create((const CreateStatement *) statement);
+                result = create((const CreateStatement *) statement);
+                break;
             case kStmtDrop:
-                return drop((const DropStatement *) statement);
+                result = drop((const DropStatement *) statement);
+                break;
             case kStmtShow:
-                return show((const ShowStatement *) statement);
-            case ktStmtInsert:
-                return nullptr;
+                result = show((const ShowStatement *) statement);
+                break;
+          /*  case ktStmtInsert:
+                result = insert((const InsertStatement *) statement);
+                break;*/
             
-            case kStmtTransaction:
+            /*case kStmtTransaction:
                 //handle different transaction statements
                 
                 switch(statement->command) {
 
-                }
+                }*/
             
             default:
-                return new QueryResult("not implemented");
+                result = new QueryResult("not implemented");
+                break;
         }
     } catch (DbRelationError &e) {
-        throw SQLExecError(string("DbRelationError: ") + e.what());
+        error = SQLExecError(string("DbRelationError: ") + e.what());
+        throwError = true;
     }
+    if(throwError)
+        throw error;
 
     //release the dblock to ensure another 
     //blocked process can read/write to the db
-    releaseDBLock();
+   // releaseDBLock();
+    return result;
 }
 
 /**
